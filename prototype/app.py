@@ -4,6 +4,7 @@ from PIL import Image
 import os
 import torch
 import clip
+import csv
 from utils import load_model, load_dataset
 
 
@@ -30,7 +31,8 @@ def main():
     country_data_path = {'한식':'./data/dataset_v1/korean', '중식':'./data/dataset_v1/chinese', '멕시칸':'./data/dataset_v1/mexican',
                          '일식':'./data/dataset_v1/japanese', '미국식':'./data/dataset_v1/american', '이탈리안':'./data/dataset_v1/italian', '아시안':'./data/dataset_v1/asian'}
 
-    if country_options and descriptions and category_options:
+    # if country_options and descriptions and category_options:
+    if st.button("추천해주세요"):
         st.write(f'선택하신 조건에 맞는 음식을 몇 가지 보여드릴게요.')
 
         if not to_english[country_options] and not to_english[descriptions] and not to_english[category_options]:
@@ -66,6 +68,12 @@ def main():
 
         images = []
         caption = []
+
+        trans = {}
+        with open('./data/dataset_v1/food_trans.csv', mode='r') as inp:
+            reader = csv.reader(inp)
+            trans = {rows[0]:rows[1] for rows in reader}
+        
         for idx, image in enumerate(image_path):
             img = Image.open(image)
             img = img.resize((225, 225))
@@ -73,7 +81,11 @@ def main():
                 images.append([])
                 caption.append([])
             images[-1].append(img)
-            caption[-1].append(image.split('/')[3].split('.')[0])
+            food_name_eng = image.split('/')[4].split('.')[0]
+            try:
+                caption[-1].append(trans[food_name_eng[:-1]])
+            except KeyError:
+                caption[-1].append(food_name_eng[:-1])
 
         col1, col2, col3 = st.columns(3)
         with col1:
