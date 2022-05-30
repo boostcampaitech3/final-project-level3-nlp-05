@@ -31,8 +31,7 @@ def main():
     country_data_path = {'한식':'./data/dataset_v1/korean', '중식':'./data/dataset_v1/chinese', '멕시칸':'./data/dataset_v1/mexican',
                          '일식':'./data/dataset_v1/japanese', '미국식':'./data/dataset_v1/american', '이탈리안':'./data/dataset_v1/italian', '아시안':'./data/dataset_v1/asian'}
 
-    # if country_options and descriptions and category_options:
-    if st.button("추천해주세요"):
+    if st.button('음식 추천해줘!'):
         st.write(f'선택하신 조건에 맞는 음식을 몇 가지 보여드릴게요.')
 
         if not to_english[country_options] and not to_english[descriptions] and not to_english[category_options]:
@@ -53,7 +52,7 @@ def main():
                 images, data_paths = load_dataset(path_to_dir)
 
                 image_labels = torch.cat([preprocess(image).unsqueeze(0) for image in images]).to(device)
-                text_input = clip.tokenize(f'a picture of {to_english[descriptions]} {to_english[category_options]} dish').to(device)
+                text_input = clip.tokenize(f'a picture of {to_english[descriptions]} {to_english[category_options]} dish').to(device) # TODO: 텍스트 쿼리 description 여러 개 실험해보기
 
                 with torch.no_grad():
                     image_features = model.encode_image(image_labels)
@@ -62,7 +61,7 @@ def main():
                     image_features /= image_features.norm(dim=-1, keepdim=True)
                     text_features /= text_features.norm(dim=-1, keepdim=True)
                     similarity = (100.0 * text_features @ image_features.T).softmax(dim=-1)
-                    values, indices = similarity[0].topk(9)
+                    values, indices = similarity[0].topk(9) # TODO: topk 여러개 받아서 새로고침 가능하게
 
                     image_path = [data_paths[i] for i in indices]
 
@@ -76,7 +75,7 @@ def main():
         
         for idx, image in enumerate(image_path):
             img = Image.open(image)
-            img = img.resize((225, 225))
+            img = img.resize((300, 300)) # TODO: 이미지 사이즈 조정
             if idx % 3 == 0:
                 images.append([])
                 caption.append([])
@@ -97,3 +96,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # TODO: fastAPI
