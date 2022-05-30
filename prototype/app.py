@@ -4,6 +4,7 @@ from PIL import Image
 import os
 import torch
 import clip
+import csv
 from utils import load_model, load_dataset
 
 
@@ -66,6 +67,12 @@ def main():
 
         images = []
         caption = []
+
+        trans = {}
+        with open('./data/dataset_v1/food_trans.csv', mode='r') as inp:
+            reader = csv.reader(inp)
+            trans = {rows[0]:rows[1] for rows in reader}
+        
         for idx, image in enumerate(image_path):
             img = Image.open(image)
             img = img.resize((300, 300)) # TODO: 이미지 사이즈 조정
@@ -73,7 +80,11 @@ def main():
                 images.append([])
                 caption.append([])
             images[-1].append(img)
-            caption[-1].append(image.split('/')[4].split('.')[0]) # TODO: 한글로 메뉴명 보여주기
+            food_name_eng = image.split('/')[4].split('.')[0]
+            try:
+                caption[-1].append(trans[food_name_eng[:-1]])
+            except KeyError:
+                caption[-1].append(food_name_eng[:-1])
 
         col1, col2, col3 = st.columns(3)
         with col1:
