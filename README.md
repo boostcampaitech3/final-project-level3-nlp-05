@@ -7,7 +7,7 @@
 ├── README.md
 ├── .gitignore
 └── data
-│   ├── dataset_v1
+│   ├── dataset_v2
 │   │   ├── american
 │   │   ├── asian
 │   │   ├── chinese
