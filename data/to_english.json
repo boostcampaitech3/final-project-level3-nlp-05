@@ -1,0 +1,27 @@
+{
+  "한식":"korean",
+  "동양":"eastern",
+  "서양":"western",
+  "잘 모르겠어요.":null,
+  "매운":"spicy", 
+  "안매운":"mild(white)",
+  "달콤한":"sweet", 
+  "바삭한":"crispy", 
+  "간편한":"convenient", 
+  "부드러운":"tender", 
+  "따뜻한":"warm", 
+  "차가운":"chilled", 
+  "상큼한":"fresh",
+  "디저트":"dessert or beverage",
+  "면":"noodle", 
+  "밥":"rice", 
+  "고기":"meat", 
+  "샐러드":"salad", 
+  "빵":"bread", 
+  "해산물":"fish",
+  "시푸드": "seafood",
+  "국/탕/찌개/찜":"stew",
+  "면/밀가루":"noodle and flour-based",
+  "면/밥":"noddle and rice"
+  
+}
