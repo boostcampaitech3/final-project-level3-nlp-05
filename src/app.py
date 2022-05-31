@@ -57,7 +57,8 @@ def main():
 
         country_data_path = {'korean': 'dataset_v2/korean', 'eastern': 'dataset_v2/eastern', 'western': 'dataset_v2/western'}
 
-        st.write('선택하신 조건에 맞는 음식을 몇 가지 보여드릴게요.')
+        place1 = st.empty()
+        place1.write('선택하신 조건에 맞는 음식을 몇 가지 보여드릴게요.')
         with st.spinner("Loading Data and Model..."):
             if country_option:
                 path_to_dir = os.path.join(data_dir, country_data_path[country_option])
@@ -119,7 +120,11 @@ def main():
         with col3:
             placeholder3 = st.image(imgs[2], width=200, caption=captions[2])
 
-        if st.button("다른 음식 보여줘"):
+        place2 = st.empty()
+        place3 = st.empty()
+        refresh = place2.button(label="다른 음식 보여줘!")
+        end = place3.button(label="종료")
+        if refresh:
             placeholder1.empty()
             placeholder2.empty()
             placeholder3.empty()
@@ -134,7 +139,15 @@ def main():
                 try: st.image(imgs[5], width=200, caption=captions[5])
                 except: pass
             st.session_state.button_clicked=False
+        if end:
+            placeholder1.empty()
+            placeholder2.empty()
+            placeholder3.empty()
+            place1.empty()
+            place2.empty()
+            place3.empty()
+
+            st.session_state.button_clicked=False
 
 if __name__ == "__main__":
     main()
-    # TODO: fastAPI
