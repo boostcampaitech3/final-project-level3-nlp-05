@@ -7,6 +7,7 @@ import clip
 import csv
 from utils import load_model, load_dataset
 import json
+import re
 
 
 def main():
@@ -51,6 +52,7 @@ def main():
     if recommend_button or st.session_state.button_clicked:
         with open(os.path.join(data_dir, 'to_english.json'), 'r') as json_file:
             to_english = json.load(json_file)
+        to_english['잘 모르겠어요.'] = ''
         country_option, category_option, description = to_english[country_option], to_english[category_option], to_english[description]
 
         country_data_path = {'korean': 'dataset_v2/korean', 'eastern': 'dataset_v2/eastern', 'western': 'dataset_v2/western'}
@@ -69,7 +71,10 @@ def main():
                 device = "cuda" if torch.cuda.is_available() else "cpu"
                 model, preprocess = load_model(device)
                 image_labels = torch.cat([preprocess(image).unsqueeze(0) for image in images]).to(device)
-                text_input = clip.tokenize(f'a picture of {description} {category_option} dish').to(device) # TODO: 텍스트 쿼리 description 여러 개 실험해보기
+
+                text = f'a picture of {description} {category_option} dish'
+                text = re.sub(r' +', ' ', text)
+                text_input = clip.tokenize(text).to(device)
 
                 with torch.no_grad():
                     image_features = model.encode_image(image_labels)
