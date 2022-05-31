@@ -75,6 +75,7 @@ def main():
                 text = f'a picture of {description} {category_option} dish'
                 text = re.sub(r' +', ' ', text)
                 text_input = clip.tokenize(text).to(device)
+                # text_input = clip.tokenize("").to(device) # 테스트 용 쿼리 (윗 줄을 주석처리 하고 사용해주세요)
 
                 with torch.no_grad():
                     image_features = model.encode_image(image_labels)
