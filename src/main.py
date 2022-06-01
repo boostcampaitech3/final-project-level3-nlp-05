@@ -10,7 +10,7 @@ import clip
 import uvicorn
 import torch
 
-from utils import load_dataset, load_model
+from utils import load_dataset, load_model, remove_duplicate
 
 app = FastAPI()
 
@@ -18,27 +18,10 @@ orders = []
 DATA_DIR = '/opt/ml/final_project/data'  # 경로 설정
 
 
-# class Order(BaseModel):
-#     id: UUID = Field(default_factory=uuid4)
-#     products: List[Product] = Field(default_factory=list)
-#     created_at: datetime = Field(default_factory=datetime.now)
-#     updated_at: datetime = Field(default_factory=datetime.now)
-#
-#     @property
-#     def bill(self):
-#         return sum([product.price for product in self.products])
-#
-#     def add_product(self, product: Product):
-#         if product.id in [existing_product.id for existing_product in self.products]:
-#             return self
-#
-#         self.products.append(product)
-#         self.updated_at = datetime.now()
-#         return self
-
 @app.get("/")
 def hello_word():
     return {"hello": "world"}
+
 
 @app.get("/order", description='주문을 요청합니다')
 def make_order(user_input: str = 'a picture of spicy meat dish',
@@ -60,10 +43,12 @@ def predict_from_user_input(user_input: str, path_to_dir: str):
         image_features /= image_features.norm(dim=-1, keepdim=True)
         text_features /= text_features.norm(dim=-1, keepdim=True)
         similarity = (100.0 * text_features @ image_features.T).softmax(dim=-1)
-        values, indices = similarity[0].topk(18)
+        values, indices = similarity[0].topk(20)
 
         selected_image_path = [data_paths[i] for i in indices]
-    return selected_image_path
+        return_list = remove_duplicate(selected_image_path)
+
+    return return_list
 
 
 if __name__=='__main__':
