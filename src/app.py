@@ -15,7 +15,7 @@ def main():
     data_dir = '../data'
 
     country_option = st.selectbox(
-        '어떤 지역의 음식을 먹고 싶으신가요?', ('아무거나', '한식', '동양', '서양')
+        '어떤 지역의 음식을 먹고 싶으신가요?', ('아무거나', '한식', '아시안, 일식, 중식', '양식')
     )
 
     with open(os.path.join(data_dir, 'food_properties.json'), 'r') as json_file:
@@ -52,42 +52,42 @@ def main():
     if recommend_button or st.session_state.button_clicked:
         with open(os.path.join(data_dir, 'to_english.json'), 'r') as json_file:
             to_english = json.load(json_file)
-        to_english['잘 모르겠어요.'] = ''
+        to_english['아무거나'] = ''
         country_option, category_option, description = to_english[country_option], to_english[category_option], to_english[description]
 
         country_data_path = {'korean': 'dataset_v2/korean', 'eastern': 'dataset_v2/eastern', 'western': 'dataset_v2/western'}
 
         place1 = st.empty()
-        place1.write('선택하신 조건에 맞는 음식을 몇 가지 보여드릴게요.')
-        with st.spinner("Loading Data and Model..."):
-            if country_option:
-                path_to_dir = os.path.join(data_dir, country_data_path[country_option])
-            else:
-                path_to_dir = os.path.join(data_dir, 'dataset_v2')
-            images, data_paths = load_dataset(path_to_dir)
+        place1.write('잠시 후에 선택하신 조건에 맞는 음식을 몇 가지 보여드릴게요.')
 
-            if not country_option and not description and not category_option:
-                selected_image_path = random.sample(data_paths, 36)
-            else:
-                device = "cuda" if torch.cuda.is_available() else "cpu"
-                model, preprocess = load_model(device)
-                image_labels = torch.cat([preprocess(image).unsqueeze(0) for image in images]).to(device)
+        if country_option:
+            path_to_dir = os.path.join(data_dir, country_data_path[country_option])
+        else:
+            path_to_dir = os.path.join(data_dir, 'dataset_v2')
+        images, data_paths = load_dataset(path_to_dir)
 
-                text = f'a picture of {description} {category_option} dish'
-                text = re.sub(r' +', ' ', text)
-                text_input = clip.tokenize(text).to(device)
-                # text_input = clip.tokenize("").to(device) # 테스트 용 쿼리 (윗 줄을 주석처리 하고 사용해주세요)
+        if not country_option and not description and not category_option:
+            selected_image_path = random.sample(data_paths, 36)
+        else:
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            model, preprocess = load_model(device)
+            image_labels = torch.cat([preprocess(image).unsqueeze(0) for image in images]).to(device)
 
-                with torch.no_grad():
-                    image_features = model.encode_image(image_labels)
-                    text_features = model.encode_text(text_input)
+            text = f'a picture of {description} {category_option} dish'
+            text = re.sub(r' +', ' ', text)
+            text_input = clip.tokenize(text).to(device)
+            # text_input = clip.tokenize("").to(device) # 테스트 용 쿼리 (윗 줄을 주석처리 하고 사용해주세요)
 
-                    image_features /= image_features.norm(dim=-1, keepdim=True)
-                    text_features /= text_features.norm(dim=-1, keepdim=True)
-                    similarity = (100.0 * text_features @ image_features.T).softmax(dim=-1)
-                    values, indices = similarity[0].topk(36)
+            with torch.no_grad():
+                image_features = model.encode_image(image_labels)
+                text_features = model.encode_text(text_input)
 
-                    selected_image_path = [data_paths[i] for i in indices]
+                image_features /= image_features.norm(dim=-1, keepdim=True)
+                text_features /= text_features.norm(dim=-1, keepdim=True)
+                similarity = (100.0 * text_features @ image_features.T).softmax(dim=-1)
+                values, indices = similarity[0].topk(36)
+
+                selected_image_path = [data_paths[i] for i in indices]
 
         with open(os.path.join(data_dir, 'food_trans.csv'), mode='r') as inp:
             reader = csv.reader(inp)
