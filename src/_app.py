@@ -119,14 +119,44 @@ def fourth_page():
     _, col2, col3, _ = st.columns(4)
     with col2:
         if st.session_state['recommend_page'] != 0:
-            st.button('이전 페이지', on_click=move_recommend_page, args=(-1,))
+            st.button('◀ 이전', on_click=move_recommend_page, args=(-1,))
     with col3:
         if st.session_state['recommend_page'] != 2:
-            st.button('다음 페이지', on_click=move_recommend_page, args=(1,))
+            st.button('다음 ▶', on_click=move_recommend_page, args=(1,))
 
-    _, col2, _ = st.columns(3)
-    with col2:
+    col1, _, _, col4 = st.columns(4)
+    with col1:
         st.button('처음으로', on_click=reset_page)
+    with col4: 
+        st.button('설문조사', on_click=change_page, args=(1,))
+
+def user_feedback_scene():
+    # 점수
+    st.title('🤔 서비스 만족도 조사입니다.')
+    score = st.slider('(필수) 추천 받은 음식에 대해 얼마나 만족하시나요? (0~5)', 0, 5, 3)
+    st. write(score,"점을 주셨습니다!")
+
+    # 이유/개선사항
+    reason = st.text_input('위의 점수를 주신 이유가 무엇인가요? 개선이 필요한 사항이나 에러가 있었다면 알려주세요!', '')
+    if reason != '':
+        st.write("설문에 참여해주셔서 감사합니다.🥰")
+    else: 
+        st.write("작성 후 꼭 엔터를 눌러주세요!")
+
+    # 기프티콘 추첨을 위한 전화번호 수집.
+    st.write('---')
+    st.write('🎁 설문에 참여해 주신 분들을 대상으로 추첨을 통해 소정의 기프티콘을 증정할 예정입니다.')
+    st.write('개인정보는 기프티콘 추첨을 위해 수집합니다. 개인정보는 추첨 이후 폐기될 예정입니다. 정보가 정확하지 않을 경우 추첨에 배제될 수 있습니다.')
+    email = st.text_input('이벤트 참여를 원하시는 분들은 이메일 주소를 작성해주세요.', 'example@oeanhdoejo.co.kr') 
+
+    st.button('이전', on_click=change_page, args=(-1,))
+
+    # for server
+    input_dict = [
+            ('score', score),  # score = '5'
+            ('reason', reason),  # reason = '~한 부분은 에러인 것 같습니다.'
+            ('email_address', email) # email = 'example@oeanhdoejo.co.kr'
+        ]   
 
 
 def move_recommend_page(move):
@@ -221,10 +251,13 @@ if __name__ == "__main__":
             print_current_selections([st.session_state['country_option'], st.session_state['category_option']])
             third_page()
 
-        else:
+        elif st.session_state['page_control'] == 4: 
             # st.write(st.session_state['country_option'], st.session_state['category_option'], st.session_state['description'])
             print_current_selections([st.session_state['country_option'], st.session_state['category_option'], st.session_state['description']])
             fourth_page()
+
+        else:
+            user_feedback_scene()
 
     else:
         st.session_state['page_control'] = 1
