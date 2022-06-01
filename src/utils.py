@@ -9,11 +9,12 @@ def load_model(device):
     return clip.load("ViT-B/32", device=device)
 
 def load_dataset(data_path):
-    if data_path == '/opt/ml/project/data/dataset_v1':
+    if data_path == '../data/dataset_v2':
         files = []
         for d in os.listdir(data_path):
-            for file in os.listdir(os.path.join(data_path, d)):
-                files.append(os.path.join(data_path, d, file))
+            if not d.startswith('.'):
+                for file in os.listdir(os.path.join(data_path, d)):
+                    files.append(os.path.join(data_path, d, file))
     else: files = [os.path.join(data_path, file) for file in os.listdir(data_path)]
 
     images = []

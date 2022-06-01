@@ -19,14 +19,14 @@ gimchijjim,김치찜
 kkomagmuchim,꼬막찜
 nulungji,누룽지
 dalg-galbi,닭갈비
-dalg-gyejang,닭계장
+dalg-gyejang,닭개장
 dalgbokk-eumtang,닭볶음탕
 deodeoggu-i,더덕구이
 dongtaejjigae,동태찌개
 doenjangjjigae,된장찌개
 dubugimchi,두부김치
 tteoggalbi,떡갈비
-tteoggug_mandugug,떡국_만두국
+tteoggug_mandugug,떡국/만두국
 tteogbokk-i,떡볶이
 ramen,라면
 rabokki,라볶이
@@ -128,7 +128,7 @@ risotto,리조또
 ravioli,라비올리
 lasagna,라자냐
 gnocchi,뇨끼
-Amatriciana,아마트리치아나
+amatriciana,아마트리치아나
 pizza,피자
 pizza_Margherita,마르게리따 피자
 arancini,아란치니
@@ -218,7 +218,6 @@ mussels,홍합
 nachos,나쵸
 oysters,굴
 paella,빠에야
-ramen,라멘
 red_velvet_cake,레드벨벳 케이크
 sashimi,사시미
 scallops,가리비
@@ -233,3 +232,10 @@ bubbletea, 버블티
 greencurry, 그린 커리
 nakasaki_champon, 나가사끼 짬뽕
 pad_thai, 팟타이
+cheese_plate, 치즈플레이트
+ensaladas, 엔살라다
+enchilada, 엔칠라다
+chimichanga, 치미창가
+pulled_pork_sandwich, 풀드 포크 샌드위치
+margherita, 마게리타 피자
+japanese_ramen, 일본라멘
