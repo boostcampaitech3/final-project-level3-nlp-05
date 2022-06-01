@@ -15,7 +15,7 @@ def main():
     data_dir = '../data'
 
     country_option = st.selectbox(
-        '어떤 지역의 음식을 먹고 싶으신가요?', ('잘 모르겠어요.', '한식', '동양', '서양')
+        '어떤 지역의 음식을 먹고 싶으신가요?', ('아무거나', '한식', '동양', '서양')
     )
 
     with open(os.path.join(data_dir, 'food_properties.json'), 'r') as json_file:
