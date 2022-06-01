@@ -1,121 +1,231 @@
 import streamlit as st
+import os, json
+import requests
 import random
 from PIL import Image
-import os
-import csv
-import requests
-
-from utils import load_model, load_dataset
+from utils import load_dataset, load_to_english, load_to_english, load_food_properties, load_country_data_path, \
+    load_food_trans, remove_duplicate
 
 
-def main():
-    st.title("오늘 뭐먹지?")
+def first_page():
+    st.title('Step 1. 어떤 지역의 음식을 먹고 싶으신가요?')
+    country_option = st.radio(
+        '', ('아무거나', '한식', '아시안, 일식, 중식', '양식')
+    )
+    st.session_state['country_option'] = country_option
 
-    col1, col2, col3 = st.columns(3)
+    # prev, next button
+    _, _, col3, col4 = st.columns(4)
+    with col4:
+        st.button('다음', on_click=change_page, args=(1, ))
+
+
+def second_page():
+    st.title('Step 2. 어떤 종류의 음식을 먹고 싶으신가요?')
+    # prepare
+    food_properties = st.session_state['food_properties']
+
+    # user_choice_list
+    country_option = st.session_state['country_option']
+
+    # viewer
+    if country_option != '양식':
+        category_option = st.radio(
+            '', food_properties['한식/동양'].keys()  # TODO: HARD FIX
+        )
+    else:
+        category_option = st.radio(
+            '', food_properties[country_option].keys()
+        )
+    st.session_state['category_option'] = category_option
+
+    # prev, next button
+    col1, _, _, col4 = st.columns(4)
     with col1:
-        country_options = st.radio(
-            '어떤 국가의 음식을 먹고 싶으신가요?', ('잘 모르겠어요.', '한식', '중식', '일식', '미국식', '이탈리안', '아시안', '멕시칸')
+        st.button('이전', on_click=change_page, args=(-1, ))
+    with col4:
+        st.button('다음', on_click=change_page, args=(1, ))
+
+    # _, col2, col3, _ = st.columns(4)
+    # with col2:
+    #     st.button('이전2', on_click=change_page, args=(-1, ))
+    # with col3:
+    #     st.button('다음2', on_click=change_page, args=(1, ))
+
+
+def third_page():
+    st.title('Step 3. 먹고 싶은 음식을 묘사하는 단어를 골라주세요.')
+    # st.json(st.session_state)
+
+    # user_choice_list
+    food_properties = st.session_state['food_properties']
+    country_option = st.session_state['country_option']
+    category_option = st.session_state['category_option']
+
+    if country_option != '양식':
+        description = st.radio(
+            '', food_properties["한식/동양"][category_option]
         )
+    else:
+        description = st.radio(
+            '', food_properties[country_option][category_option]
+        )
+    st.session_state['description'] = description
+
+    # prev, next button
+    col1, _, _, col4 = st.columns(4)
+    with col1:
+        st.button('이전', on_click=change_page, args=(-1,))
+    with col4:
+        st.button('추천받기', on_click=change_page, args=(1,))
+
+
+def fourth_page():
+    st.title('외않되조가 추천하는 식사 메뉴!')
+
+    # Viewer start
+    selected_image_path = st.session_state['selected_image_path']
+    trans = st.session_state['food_trans']
+
+    # st.write(selected_image_path)
+
+    image_dict = []
+    start_idx = 0 + 4*st.session_state['recommend_page']
+    end_idx = 4 + 4*st.session_state['recommend_page']
+
+    for img_path in selected_image_path[start_idx : end_idx]:
+        food_name_eng = img_path.split('/')[-1].split('.')[0]
+        img = Image.open(img_path)
+        img = img.resize((300, 300))
+
+        image_dict.append({
+            'img': img,
+            'caption': trans[food_name_eng[:-1]]
+        })
+
+    col1, col2 = st.columns(2)
+    # random.shuffle(image_dict)
+    # st.write(image_dict)
+
+    start = 0
+    with col1:
+        placeholder1 = st.image(image_dict[start]['img'], width=300, caption=image_dict[start]['caption'])
+        placeholder3 = st.image(image_dict[start+2]['img'], width=300, caption=image_dict[start+2]['caption'])
     with col2:
-        descriptions = st.radio(
-            '먹고 싶은 음식을 묘사하는 단어를 골라주세요.', ('잘 모르겠어요.', '매운', '안매운', '달콤한', '바삭한', '간편한', '부드러운', '따뜻한', '차가운', '상큼한')
-        )
+        placeholder2 = st.image(image_dict[start+1]['img'], width=300, caption=image_dict[start+1]['caption'])
+        placeholder4 = st.image(image_dict[start + 3]['img'], width=300, caption=image_dict[start+3]['caption'])
+
+    # prev, next button
+    _, col2, col3, _ = st.columns(4)
+    with col2:
+        if st.session_state['recommend_page'] != 0:
+            st.button('이전 페이지', on_click=move_recommend_page, args=(-1,))
     with col3:
-        category_options = st.radio(
-            '어떤 종류의 음식을 먹고 싶으신가요?', ('잘 모르겠어요.', '디저트', '면', '밥', '고기', '샐러드', '빵(밀가루 음식)', '해산물', '국/탕/찌개/찜')
-        )
+        if st.session_state['recommend_page'] != 2:
+            st.button('다음 페이지', on_click=move_recommend_page, args=(1,))
 
-    to_english = {'한식': 'Korean', '중식': 'Chinese', '멕시칸': 'Mexican', '일식': 'Japanese', '미국식': 'American',
-                  '이탈리안': 'Italian', '아시안': 'Asian', '잘 모르겠어요.': None,
-                  '매운': 'spicy', '안매운': 'mild', '달콤한': 'sweet', '바삭한': 'crispy', '간편한': 'convenient', '부드러운': 'tender',
-                  '따뜻한': 'warm', '차가운': 'chilled', '상큼한': 'fresh',
-                  '디저트': 'dessert', '면': 'noodle', '밥': 'rice', '고기': 'meat', '샐러드': 'salad',
-                  '빵(밀가루 음식)': 'flour-based', '해산물': 'seafood', '국/탕/찌개/찜': 'stew'}
+    _, col2, _ = st.columns(3)
+    with col2:
+        st.button('처음으로', on_click=reset_page)
 
-    country_data_path = {'한식': 'dataset_v1/korean', '중식': 'dataset_v1/chinese', '멕시칸': 'dataset_v1/mexican',
-                         '일식': 'dataset_v1/japanese', '미국식': 'dataset_v1/american', '이탈리안': 'dataset_v1/italian',
-                         '아시안': 'dataset_v1/asian'}
 
-    if "button_clicked" not in st.session_state:
-        st.session_state.button_clicked = False
+def move_recommend_page(move):
+    st.session_state['recommend_page'] += move
 
-    def callback():
-        st.session_state.button_clicked = True
 
-    recommend_button = st.button(label='음식 추천해줘!', on_click=callback)
+def change_page(move):
+    st.session_state['page_control'] += move
 
-    if recommend_button or st.session_state.button_clicked:
-        st.write('선택하신 조건에 맞는 음식을 몇 가지 보여드릴게요.')
-        with st.spinner("Loading Data and Model..."):
-            data_dir = '/opt/ml/final_project/data'  # 데이터 경로를 설정해주세요.
-            if to_english[country_options]:
-                path_to_dir = os.path.join(data_dir, country_data_path[country_options])
-            else:
-                path_to_dir = os.path.join(data_dir, 'dataset_v1')
+    if st.session_state['page_control'] == 4:
+        get_recommend_food_image_list()
 
-            if not to_english[country_options] and not to_english[descriptions] and not to_english[category_options]:
-                # 아무거나를 선택한 경우, 랜덤으로 보여줌
-                image, data_paths = load_dataset(path_to_dir)
-                selected_image_path = random.sample(data_paths, 18)
-            else:
-                input_text = f'a picture of {to_english[descriptions]} {to_english[category_options]} dish'
-                input_dict = [
-                    ('user_input', input_text),  # user_input = 'A picture of spicy meat dis'
-                    ('path_to_dir', path_to_dir) # path_to_dir = 'opt/ml/fianl_project/data/dataset_v1/korean'
-                ]
 
-                from urllib import parse
-                queries = parse.urlencode(input_dict)
-                request_url = "http://localhost:30003/order?" + queries
-                response = requests.get(request_url)
-                selected_image_path = response.json()
+def reset_page():
+    del st.session_state['page_control']
+    del st.session_state['country_option']
+    del st.session_state['category_option']
+    del st.session_state['selected_image_path']
 
-        with open(os.path.join(data_dir, 'food_trans.csv'), mode='r') as inp:
-            reader = csv.reader(inp)
-            trans = {rows[0]:rows[1] for rows in reader}
 
-        imgs = []
-        captions = []
-        i = 0
-        for image in selected_image_path:
-            if i % 3 == 0:
-                imgs.append([])
-                captions.append([])
+def get_recommend_food_image_list():
+    st.session_state['recommend_page'] = 0
 
-            img = Image.open(image)
-            img = img.resize((300, 300))  # TODO: 이미지 사이즈 조정
-            imgs[-1].append(img)
-            i += 1
+    to_english = st.session_state['to_english']
 
-            food_name_eng = image.split('/')[7].split('.')[0]
-            try:
-                captions[-1].append(trans[food_name_eng[:-1]])
-            except KeyError:
-                captions[-1].append(food_name_eng[:-1])
+    country_option = st.session_state['country_option']
+    category_option = st.session_state['category_option']
+    description = st.session_state['description']
+    country_data_path = st.session_state['country_data_path']
 
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            placeholder1 = st.image(imgs[0], width=200, caption=captions[0])
-        with col2:
-            placeholder2 = st.image(imgs[1], width=200, caption=captions[1])
-        with col3:
-            placeholder3 = st.image(imgs[2], width=200, caption=captions[2])
+    country_option, category_option, description = to_english[country_option], \
+                                                   to_english[category_option], \
+                                                   to_english[description]
+    path_to_dir = os.path.join(DATA_DIR, country_data_path[country_option])
 
-        if st.button("다른 음식 보여줘"):
-            placeholder1.empty()
-            placeholder2.empty()
-            placeholder3.empty()
+    if not country_option and not description and not category_option:
+        images, data_paths = load_dataset(path_to_dir)
+        selected_image_path = random.sample(data_paths, st.session_state['top_k'])
+        selected_image_path = remove_duplicate(selected_image_path)
 
-            with col1:
-                st.image(imgs[3], width=200, caption=captions[3])
-            with col2:
-                st.image(imgs[4], width=200, caption=captions[4])
-            with col3:
-                st.image(imgs[5], width=200, caption=captions[5])
-            st.session_state.button_clicked=False
-        st.session_state.button_clicked = False
+    else:
+        path_to_dir = os.path.join(DATA_DIR, country_data_path[country_option])
+
+        input_text = f'a picture of {description} {category_option} dish'
+        input_dict = [
+            ('user_input', input_text),  # user_input = 'A picture of spicy meat dis'
+            ('path_to_dir', path_to_dir)  # path_to_dir = 'opt/ml/fianl_project/data/dataset_v1/korean'
+        ]
+
+        from urllib import parse
+        queries = parse.urlencode(input_dict)
+        request_url = f"{SERVER_IP_ADDRESS}?{queries}"
+        response = requests.get(request_url)
+        selected_image_path = response.json()
+
+    random.shuffle(selected_image_path)
+    # st.write(selected_image_path)  # DEBUGGING
+    st.session_state['selected_image_path'] = selected_image_path
+
+
+def print_current_selections(user_checklist: list):
+    return st.multiselect('현재까지 선택한 사항들', user_checklist,
+                           default = user_checklist,
+                           disabled = True)
 
 
 if __name__ == "__main__":
-    main()
-    # TODO: fastAPI
+    DATA_DIR = '../data'
+    TOP_K = 30
+    SERVER_IP_ADDRESS = 'http://localhost:30003/order'
+
+    if 'is_loaded' not in st.session_state:
+        st.session_state['top_k'] = TOP_K
+        st.session_state['food_properties'] = load_food_properties(DATA_DIR)
+        st.session_state['to_english'] = load_to_english(DATA_DIR)
+        st.session_state['country_data_path'] = load_country_data_path(DATA_DIR)
+        st.session_state['food_trans'] = load_food_trans(DATA_DIR)
+        st.session_state['is_loaded'] = True
+
+    if 'page_control' in st.session_state:
+        # st.write(st.session_state['page_control'])
+        if st.session_state['page_control'] == 1:
+            first_page()
+
+        elif st.session_state['page_control'] == 2:
+            # st.write(st.session_state['country_option'])
+            print_current_selections([st.session_state['country_option']])
+            second_page()
+
+        elif st.session_state['page_control'] == 3:
+            # st.write(st.session_state['country_option'], st.session_state['category_option'])
+            print_current_selections([st.session_state['country_option'], st.session_state['category_option']])
+            third_page()
+
+        else:
+            # st.write(st.session_state['country_option'], st.session_state['category_option'], st.session_state['description'])
+            print_current_selections([st.session_state['country_option'], st.session_state['category_option'], st.session_state['description']])
+            fourth_page()
+
+    else:
+        st.session_state['page_control'] = 1
+        first_page()
