@@ -1,6 +1,6 @@
 {
   "한식":"korean",
-  "아시안, 일식, 중식":"eastern",
+  "아시안":"eastern",
   "양식":"western",
   "매운":"spicy", 
   "안매운":"mild(white)",
@@ -18,7 +18,7 @@
   "샐러드":"salad", 
   "빵":"bread", 
   "해산물":"fish",
-  "시푸드": "seafood",
+  "해물": "seafood",
   "국/탕/찌개/찜":"stew",
   "면/밀가루":"noodle and flour-based",
   "면/밥":"noddle and rice",

@@ -11,9 +11,14 @@ from urllib import parse
 def first_page():
     st.title('Step 1. 어떤 지역의 음식을 먹고 싶으신가요?')
     country_option = st.radio(
-        '', ('아무거나', '한식', '아시안, 일식, 중식', '양식')
+        '', ('아무거나', '한식', '아시안, 일식, 중식', '양식, 이탈리안, 멕시칸')
     )
-    st.session_state['country_option'] = country_option
+    if country_option == '양식, 이탈리안, 멕시칸':
+        st.session_state['country_option'] = '양식'
+    elif country_option == '아시안, 일식, 중식':
+        st.session_state['country_option'] = '아시안'
+    else:
+        st.session_state['country_option'] = country_option
 
     # prev, next button
     _, _, col3, col4 = st.columns(4)
@@ -30,14 +35,9 @@ def second_page():
     country_option = st.session_state['country_option']
 
     # viewer
-    if country_option != '양식':
-        category_option = st.radio(
-            '', food_properties['한식/동양'].keys()  # TODO: HARD FIX
-        )
-    else:
-        category_option = st.radio(
-            '', food_properties[country_option].keys()
-        )
+    category_option = st.radio(
+        '', food_properties[country_option].keys()
+    )
     st.session_state['category_option'] = category_option
 
     # prev, next button
@@ -63,14 +63,9 @@ def third_page():
     country_option = st.session_state['country_option']
     category_option = st.session_state['category_option']
 
-    if country_option != '양식':
-        description = st.radio(
-            '', food_properties["한식/동양"][category_option]
-        )
-    else:
-        description = st.radio(
-            '', food_properties[country_option][category_option]
-        )
+    description = st.radio(
+        '', food_properties[country_option][category_option]
+    )
     st.session_state['description'] = description
 
     # prev, next button
@@ -182,6 +177,7 @@ def user_feedback_scene():
 def thanks_scene():
     st.balloons()
     st.title('제출 완료되었습니다! 감사합니다!!')
+    st.markdown("![thank you!](https://thumbs.gfycat.com/InfatuatedComposedArcticduck-size_restricted.gif)")
 
     _, col2, _ = st.columns(3)
     with col2:
