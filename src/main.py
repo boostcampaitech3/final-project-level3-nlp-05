@@ -9,6 +9,8 @@ import clip
 
 import uvicorn
 import torch
+import os
+import time
 
 from utils import load_dataset, load_model, remove_duplicate
 
@@ -16,11 +18,34 @@ app = FastAPI()
 
 orders = []
 DATA_DIR = '/opt/ml/final_project/data'  # 경로 설정
+FEEDBACK_DIR = '../feedback'
+
+
+class UserFeedback(BaseModel):
+    rate: int
+    description: str
+    email: Optional[str] = None
 
 
 @app.get("/")
 def hello_word():
     return {"hello": "world"}
+
+
+@app.post('/feedback', description='유저 피드백을 저장합니다')
+def save_user_feedback(user_feedback: UserFeedback):
+    print(user_feedback)
+    try:
+        if not os.path.exists(FEEDBACK_DIR):
+            os.makedirs(FEEDBACK_DIR)
+
+        with open(os.path.join(FEEDBACK_DIR, 'user_feedback.tsv'), 'a', newline='',encoding='utf-8') as wf:
+            now = time.localtime()
+            user_time = "%04d/%02d/%02d %02d:%02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+
+            wf.writelines(f'{user_time}\t{user_feedback.rate}\t{user_feedback.description}\t{user_feedback.email}\n')
+    except OSError:
+        print("Error: Failed to create the directory.")
 
 
 @app.get("/order", description='주문을 요청합니다')
