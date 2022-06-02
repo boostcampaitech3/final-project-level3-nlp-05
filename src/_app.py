@@ -93,8 +93,16 @@ def fourth_page():
     # st.write(selected_image_path)
 
     image_dict = []
-    start_idx = 0 + 4*st.session_state['recommend_page']
-    end_idx = 4 + 4*st.session_state['recommend_page']
+    # recommend_page = 0
+    # if st.session_state['recommend_page'] < 0:
+    #     recommend_page = 0
+    # elif st.session_state['recommend_page'] > 2:
+    #     recommend_page = 2
+    # else:
+    recommend_page = st.session_state['recommend_page']
+
+    start_idx = 0 + 4*recommend_page
+    end_idx = 4 + 4*recommend_page
 
     for img_path in selected_image_path[start_idx : end_idx]:
         food_name_eng = img_path.split('/')[-1].split('.')[0]
@@ -125,8 +133,7 @@ def fourth_page():
             st.button('◀ 이전', on_click=move_recommend_page, args=(-1,))
     with col3:
         if st.session_state['recommend_page'] != 2 and not next:
-            next = st.button('다음 ▶', on_click=move_recommend_page, args=(1,))
-            st.write(next)
+            st.button('다음 ▶', on_click=move_recommend_page, args=(1,))
 
     col1, _, _, col4 = st.columns(4)
     with col1:
@@ -182,10 +189,10 @@ def thanks_scene():
 
 
 def move_recommend_page(move):
-    if st.session_state['recommend_page'] == 0 and move == -1:
+    if st.session_state['recommend_page'] <= 0 and move == -1:
         return
-    elif st.session_state['recommend_page'] == 3 and move == 1:
-        st.write('NOOOOOOO')
+    elif st.session_state['recommend_page'] >= 2 and move == 1:
+        return
     else:
         st.session_state['recommend_page'] += move
 
