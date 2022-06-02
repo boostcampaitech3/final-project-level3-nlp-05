@@ -4,7 +4,7 @@ import requests
 import random
 from PIL import Image
 from utils import load_dataset, load_to_english, load_to_english, load_food_properties, load_country_data_path, \
-    load_food_trans, remove_duplicate
+    load_food_trans, remove_duplicate, load_query_list
 from urllib import parse
 
 
@@ -85,15 +85,7 @@ def fourth_page():
     selected_image_path = st.session_state['selected_image_path']
     trans = st.session_state['food_trans']
 
-    # st.write(selected_image_path)
-
     image_dict = []
-    # recommend_page = 0
-    # if st.session_state['recommend_page'] < 0:
-    #     recommend_page = 0
-    # elif st.session_state['recommend_page'] > 2:
-    #     recommend_page = 2
-    # else:
     recommend_page = st.session_state['recommend_page']
 
     start_idx = 0 + 4*recommend_page
@@ -121,20 +113,30 @@ def fourth_page():
         placeholder2 = st.image(image_dict[start+1]['img'], width=300, caption=image_dict[start+1]['caption'])
         placeholder4 = st.image(image_dict[start + 3]['img'], width=300, caption=image_dict[start+3]['caption'])
 
-    # prev, next button
-    _, col2, col3, _ = st.columns(4)
+    _, col2, _ = st.columns(3)
     with col2:
-        if st.session_state['recommend_page'] != 0:
+        if st.session_state['recommend_page'] == 1:
             st.button('◀ 이전', on_click=move_recommend_page, args=(-1,))
-    with col3:
-        if st.session_state['recommend_page'] != 2 and not next:
+        elif st.session_state['recommend_page'] == 0:
             st.button('다음 ▶', on_click=move_recommend_page, args=(1,))
+        else:
+            st.error('오류 발생! 새로고침 해주세요!!')
 
-    col1, _, _, col4 = st.columns(4)
-    with col1:
-        st.button('처음으로', on_click=reset_page)
-    with col4: 
-        st.button('설문조사', on_click=change_page, args=(1,))
+    st.write('')
+    st.write('')
+    st.write('')
+    st.info('''
+    안녕하세요. 외않되조입니다.\n 
+    사이트 사용자들을 대상으로 설문조사를 진행하고 있습니다.\n
+    바쁘시겠지만, 잠시만 시간을 내어 참여해주시면 감사하겠습니다!\n
+    (설문조사 참여자를 대상으로 추첨을 통해 소정의 기프티콘을 전달드릴 예정입니다! 많은 참여 부탁드립니다!)
+    ''')
+
+    st.button('설문조사 하러가기', on_click=change_page, args=(1,))
+    st.write('')
+    st.write('')
+    st.write('')
+    st.button('처음으로', on_click=reset_page)
 
 
 def user_feedback_scene():
@@ -167,10 +169,12 @@ def user_feedback_scene():
         ('email', email)  # email = 'example@oeanhdoejo.co.kr'
     ]
 
-    st.button('이전', on_click=change_page, args=(-1,))
+    # st.button('이전', on_click=change_page, args=(-1,))
 
     _, col2, _ = st.columns(3)
     with col2:
+        st.write('')
+        st.write('')
         send_uf = st.button('제출하기', on_click=send_user_feedback, args=(input_dict,))
 
 
@@ -185,12 +189,13 @@ def thanks_scene():
 
 
 def move_recommend_page(move):
-    if st.session_state['recommend_page'] <= 0 and move == -1:
-        return
-    elif st.session_state['recommend_page'] >= 2 and move == 1:
-        return
-    else:
-        st.session_state['recommend_page'] += move
+    # if st.session_state['recommend_page'] <= 0 and move == -1:
+    #     return
+    # elif st.session_state['recommend_page'] >= 1 and move == 1:
+    #     return
+    # else:
+    #     st.session_state['recommend_page'] += move
+    st.session_state['recommend_page'] = 0 if st.session_state['recommend_page'] == 1 else 1
 
 
 def change_page(move):
@@ -223,10 +228,12 @@ def get_recommend_food_image_list():
     category_option = st.session_state['category_option']
     description = st.session_state['description']
     country_data_path = st.session_state['country_data_path']
+    query_dict = st.session_state['query_list']
 
     country_option, category_option, description = to_english[country_option], \
                                                    to_english[category_option], \
                                                    to_english[description]
+    st.write(f'{country_option}\t{category_option}\t{description}')  # DEBUGGING
     path_to_dir = os.path.join(DATA_DIR, country_data_path[country_option])
 
     if not country_option and not description and not category_option:
@@ -237,7 +244,14 @@ def get_recommend_food_image_list():
     else:
         path_to_dir = os.path.join(DATA_DIR, country_data_path[country_option])
 
-        input_text = f'a picture of {description} {category_option} dish'
+        description_candidate = query_dict[country_option][category_option][description]
+        key = random.choice(list(description_candidate.keys()))
+        input_candidate = description_candidate[key]
+        st.write(f'input_candidate: {key}')  # DEBUGGING
+        st.json(input_candidate)
+        input_text = input_candidate[random.randint(0, len(input_candidate)-1)]
+
+        # input_text = f'a picture of {description} {category_option} dish'
         input_dict = [
             ('user_input', input_text),  # user_input = 'A picture of spicy meat dis'
             ('path_to_dir', path_to_dir)  # path_to_dir = 'opt/ml/fianl_project/data/dataset_v1/korean'
@@ -270,6 +284,7 @@ if __name__ == "__main__":
         st.session_state['to_english'] = load_to_english(DATA_DIR)
         st.session_state['country_data_path'] = load_country_data_path(DATA_DIR)
         st.session_state['food_trans'] = load_food_trans(DATA_DIR)
+        st.session_state['query_list'] = load_query_list(DATA_DIR)
         st.session_state['is_loaded'] = True
 
     if 'page_control' in st.session_state:
