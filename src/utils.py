@@ -39,7 +39,7 @@ def remove_duplicate(selected_image_path):
     return_list = []
     name_list = set()
     for img_path in selected_image_path:
-        if len(return_list) == 12:
+        if len(return_list) == 8:
             break
 
         food_name = (img_path.split('/')[-1]).split('.')[0]
@@ -72,3 +72,9 @@ def load_food_trans(data_dir):
         reader = csv.reader(inp)
         trans = {rows[0]: rows[1] for rows in reader}
     return trans
+
+
+def load_query_list(data_dir):
+    with open(os.path.join(data_dir, 'query_list.json'), 'r') as json_file:
+        query_list = json.load(json_file)
+    return query_list
