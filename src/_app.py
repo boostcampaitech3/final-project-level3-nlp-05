@@ -83,6 +83,8 @@ def third_page():
 
 def fourth_page():
     st.title('외않되조가 추천하는 식사 메뉴!')
+    next = False
+    prev = False
 
     # Viewer start
     selected_image_path = st.session_state['selected_image_path']
@@ -122,8 +124,9 @@ def fourth_page():
         if st.session_state['recommend_page'] != 0:
             st.button('◀ 이전', on_click=move_recommend_page, args=(-1,))
     with col3:
-        if st.session_state['recommend_page'] != 2:
-            st.button('다음 ▶', on_click=move_recommend_page, args=(1,))
+        if st.session_state['recommend_page'] != 2 and not next:
+            next = st.button('다음 ▶', on_click=move_recommend_page, args=(1,))
+            st.write(next)
 
     col1, _, _, col4 = st.columns(4)
     with col1:
@@ -161,13 +164,30 @@ def user_feedback_scene():
         ('description', reason),  # reason = '~한 부분은 에러인 것 같습니다.'
         ('email', email)  # email = 'example@oeanhdoejo.co.kr'
     ]
-    st.button('제출하기', on_click=send_user_feedback, args=(input_dict,))
 
     st.button('이전', on_click=change_page, args=(-1,))
 
+    _, col2, _ = st.columns(3)
+    with col2:
+        send_uf = st.button('제출하기', on_click=send_user_feedback, args=(input_dict,))
+
+
+def thanks_scene():
+    st.balloons()
+    st.title('제출 완료되었습니다! 감사합니다!!')
+
+    _, col2, _ = st.columns(3)
+    with col2:
+        st.button('처음으로', on_click=reset_page)
+
 
 def move_recommend_page(move):
-    st.session_state['recommend_page'] += move
+    if st.session_state['recommend_page'] == 0 and move == -1:
+        return
+    elif st.session_state['recommend_page'] == 3 and move == 1:
+        st.write('NOOOOOOO')
+    else:
+        st.session_state['recommend_page'] += move
 
 
 def change_page(move):
@@ -188,6 +208,7 @@ def send_user_feedback(user_feedback):
     # queries = parse.urlencode(user_feedback)
     request_url = f"{SERVER_IP_ADDRESS}feedback"
     response = requests.post(request_url, json=user_feedback)
+    change_page(1)
 
 
 def get_recommend_food_image_list():
@@ -268,8 +289,12 @@ if __name__ == "__main__":
             print_current_selections([st.session_state['country_option'], st.session_state['category_option'], st.session_state['description']])
             fourth_page()
 
-        else:
+        elif st.session_state['page_control'] == 5:
             user_feedback_scene()
+
+        else:
+            thanks_scene()
+
 
     else:
         st.session_state['page_control'] = 1
