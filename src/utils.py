@@ -39,7 +39,7 @@ def remove_duplicate(selected_image_path):
     return_list = []
     name_list = set()
     for img_path in selected_image_path:
-        if len(return_list) == 8:
+        if len(return_list) == 9:
             break
 
         food_name = (img_path.split('/')[-1]).split('.')[0]

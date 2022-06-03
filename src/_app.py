@@ -73,8 +73,6 @@ def third_page():
 
 def fourth_page():
     st.title('외않되조가 추천하는 식사 메뉴!')
-    next = False
-    prev = False
 
     # Viewer start
     selected_image_path = st.session_state['selected_image_path']
@@ -82,40 +80,40 @@ def fourth_page():
 
     image_dict = []
     recommend_page = st.session_state['recommend_page']
+    
+    imgs = [[]]
+    captions = [[]]
+    items = []
+    i = 0
+    for img_path in selected_image_path:
+        if i % 3 == 0 and imgs[-1]:
+            imgs.append([])
+            captions.append([])
 
-    start_idx = 0 + 4*recommend_page
-    end_idx = 4 + 4*recommend_page
-
-    for img_path in selected_image_path[start_idx : end_idx]:
         food_name_eng = img_path.split('/')[-1].split('.')[0]
-        img = Image.open(img_path)
-        img = img.resize((300, 300))
 
-        image_dict.append({
-            'img': img,
-            'caption': trans[food_name_eng[:-1]]
-        })
+        if trans[food_name_eng[:-1]] not in items:
+                captions[-1].append(trans[food_name_eng[:-1]])
+                items.append(trans[food_name_eng[:-1]])
+                img = Image.open(img_path)
+                img = img.resize((300, 300))
+                imgs[-1].append(img)
 
-    col1, col2 = st.columns(2)
-    # random.shuffle(image_dict)
-    # st.write(image_dict)
+                image_dict.append({
+                    'img': img,
+                    'caption': trans[food_name_eng[:-1]]
+                })
 
-    start = 0
+                i += 1
+
+    col1, col2, col3 = st.columns(3)
+
     with col1:
-        placeholder1 = st.image(image_dict[start]['img'], width=300, caption=image_dict[start]['caption'])
-        placeholder3 = st.image(image_dict[start+2]['img'], width=300, caption=image_dict[start+2]['caption'])
+        placeholder1 = st.image(imgs[0], width=200, caption=captions[0])
     with col2:
-        placeholder2 = st.image(image_dict[start+1]['img'], width=300, caption=image_dict[start+1]['caption'])
-        placeholder4 = st.image(image_dict[start + 3]['img'], width=300, caption=image_dict[start+3]['caption'])
-
-    _, col2, _ = st.columns(3)
-    with col2:
-        if st.session_state['recommend_page'] == 1:
-            st.button('◀ 이전', on_click=move_recommend_page, args=(-1,))
-        elif st.session_state['recommend_page'] == 0:
-            st.button('다음 ▶', on_click=move_recommend_page, args=(1,))
-        else:
-            st.error('오류 발생! 새로고침 해주세요!!')
+        placeholder2 = st.image(imgs[1], width=200, caption=captions[1])
+    with col3:
+        placeholder3 = st.image(imgs[2], width=200, caption=captions[2])
 
     st.write('')
     st.write('')
@@ -235,6 +233,7 @@ def get_recommend_food_image_list():
         images, data_paths = load_dataset(path_to_dir)
         selected_image_path = random.sample(data_paths, st.session_state['top_k'])
         selected_image_path = remove_duplicate(selected_image_path)
+        st.write(selected_image_path) # debugging
 
     else:
         path_to_dir = os.path.join(DATA_DIR, country_data_path[country_option])
@@ -255,7 +254,7 @@ def get_recommend_food_image_list():
         queries = parse.urlencode(input_dict)
         request_url = f"{SERVER_IP_ADDRESS}order?{queries}"
         response = requests.get(request_url)
-        selected_image_path = response.json()
+        selected_image_path = response.json() 
 
     random.shuffle(selected_image_path)
     # st.write(selected_image_path)  # DEBUGGING
