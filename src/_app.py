@@ -47,12 +47,6 @@ def second_page():
     with col4:
         st.button('다음', on_click=change_page, args=(1, ))
 
-    # _, col2, col3, _ = st.columns(4)
-    # with col2:
-    #     st.button('이전2', on_click=change_page, args=(-1, ))
-    # with col3:
-    #     st.button('다음2', on_click=change_page, args=(1, ))
-
 
 def third_page():
     st.title('Step 3. 먹고 싶은 음식을 묘사하는 단어를 골라주세요.')
@@ -66,7 +60,8 @@ def third_page():
     description = st.radio(
         '', food_properties[country_option][category_option]
     )
-    st.session_state['description'] = description
+
+    st.session_state['description'] = description[:-1] if description != '아무거나' else '아무거나'  # HARD_FIX
 
     # prev, next button
     col1, _, _, col4 = st.columns(4)
@@ -233,7 +228,7 @@ def get_recommend_food_image_list():
     country_option, category_option, description = to_english[country_option], \
                                                    to_english[category_option], \
                                                    to_english[description]
-    st.write(f'{country_option}\t{category_option}\t{description}')  # DEBUGGING
+    # st.write(f'{country_option}\t{category_option}\t{description}')  # DEBUGGING
     path_to_dir = os.path.join(DATA_DIR, country_data_path[country_option])
 
     if not country_option and not description and not category_option:
@@ -247,8 +242,8 @@ def get_recommend_food_image_list():
         description_candidate = query_dict[country_option][category_option][description]
         key = random.choice(list(description_candidate.keys()))
         input_candidate = description_candidate[key]
-        st.write(f'input_candidate: {key}')  # DEBUGGING
-        st.json(input_candidate)
+        # st.write(f'input_candidate: {key}')  # DEBUGGING
+        # st.json(input_candidate)
         input_text = input_candidate[random.randint(0, len(input_candidate)-1)]
 
         # input_text = f'a picture of {description} {category_option} dish'
