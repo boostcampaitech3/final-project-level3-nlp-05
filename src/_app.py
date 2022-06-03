@@ -233,7 +233,7 @@ def get_recommend_food_image_list():
         images, data_paths = load_dataset(path_to_dir)
         selected_image_path = random.sample(data_paths, st.session_state['top_k'])
         selected_image_path = remove_duplicate(selected_image_path)
-        st.write(selected_image_path) # debugging
+        # st.write(selected_image_path) # debugging
 
     else:
         path_to_dir = os.path.join(DATA_DIR, country_data_path[country_option])
