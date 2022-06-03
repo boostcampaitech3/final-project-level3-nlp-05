@@ -149,7 +149,7 @@ def user_feedback_scene():
     st.write('---')
     st.write('🎁 설문에 참여해 주신 분들을 대상으로 추첨을 통해 소정의 기프티콘을 증정할 예정입니다.')
     st.write('개인정보는 기프티콘 추첨을 위해 수집합니다. 개인정보는 추첨 이후 폐기될 예정입니다. 정보가 정확하지 않을 경우 추첨에 배제될 수 있습니다.')
-    email = st.text_input('이벤트 참여를 원하시는 분들은 이메일 주소를 작성해주세요.', placeholder='example@oeanhdoejo.co.kr')
+    email = st.text_input('이벤트 참여를 원하시는 분들은 캠퍼 아이디 또는 이메일 주소를 작성해주세요.', placeholder='T3000 or example@oeanhdoejo.co.kr')
     if email != '':
         st.write("설문에 참여해주셔서 감사합니다.🥰")
     else:
