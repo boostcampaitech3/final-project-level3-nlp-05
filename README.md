@@ -68,9 +68,6 @@ Naver Boostcamp AI tech 3rd final project
     ├── main.py
     └── utils.py
 ```
-
-<br />
-
 ## How to run
 ### fastapi
 `python3 main.py`
