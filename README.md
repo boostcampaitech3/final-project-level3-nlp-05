@@ -45,7 +45,7 @@ Naver Boostcamp AI tech 3rd final project
 - [OS] Linux version 4.4.0-59-generic
 - [CPU / GPU] Intel(R) Xeon(R) Gold 5220 CPU @ 2.20GHz / Tesla V100-SXM2-32GB 
 - [Collaboration Tool] Git-hub / Slack / Notion 
-- [IDE] VSCode / Jupyter lab
+- [IDE] VSCode / PyCharm / Jupyter lab
 
 # 5. Getting Started
 
@@ -73,4 +73,4 @@ Naver Boostcamp AI tech 3rd final project
 `python3 main.py`
 
 ### Streamlit 
-`streamlit run app.py --server.port=30002`
+`streamlit run _app.py --server.port=30002`
