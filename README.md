@@ -13,12 +13,12 @@ Naver Boostcamp AI tech 3rd final project
 [Github](https://github.com/angieKang)|[Github](https://github.com/mounKim)|[Github](https://github.com/TB2715)|[Github](https://github.com/minji2744)|[Github](https://github.com/jeeyeon51)
 
 ### 👥 contribution
-- 강나경: streamlit (유저 피드백) 개발, query 속성 고도화, 발표
-- 김산: 데이터 수집, 쿼리 테스트 및 추가, 응원
-- 김현지: streamlit, fastapi, 발표 자료 제작
-- 정민지: CLIP 모델링, streamlit 프로토타입 개발, 프로젝트 문제 정의
-- 최지연: 음식 번역, query expansion
-- 공통: 데이터 수집, query 분류체계 수립
+- `강나경`: streamlit (유저 피드백) 개발, query 속성 고도화, 발표
+- `김산`: 데이터 수집, 쿼리 테스트 및 추가, 응원
+- `김현지`: streamlit, fastapi, 발표 자료 제작
+- `정민지`: CLIP 모델링, streamlit 프로토타입 개발, 프로젝트 문제 정의
+- `최지연`: 음식 번역, query expansion
+- `공통`: 데이터 수집, query 분류체계 수립
 
 # 2. Introduction
 ## 프로젝트 개요
